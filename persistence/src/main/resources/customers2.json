@@ -1,0 +1,37 @@
+[
+  {
+    "customer": {
+      "name": "DAMIAN",
+      "surname": "KOWALSKI",
+      "age": 18,
+      "cash": 22000
+    },
+    "products": [
+      {
+        "name": "Komputer",
+        "price": 2200,
+        "category": "ELEKTRONIKA"
+      },
+      {
+        "name": "Telefon",
+        "price": 1400,
+        "category": "ELEKTRONIKA"
+      }
+    ]
+  },
+  {
+    "customer": {
+      "name": "MAJA",
+      "surname": "NOWAK",
+      "age": 24,
+      "cash": 3800
+    },
+    "products": [
+      {
+        "name": "Słuchawki",
+        "price": 220,
+        "category": "ELEKTRONIKA"
+      }
+    ]
+  }
+]

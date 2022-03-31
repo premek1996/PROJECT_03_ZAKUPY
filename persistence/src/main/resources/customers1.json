@@ -1,0 +1,67 @@
+[
+  {
+    "customer": {
+      "name": "JAN",
+      "surname": "KOS",
+      "age": 18,
+      "cash": 2000
+    },
+    "products": [
+      {
+        "name": "Komputer",
+        "price": 2300,
+        "category": "ELEKTRONIKA"
+      },
+      {
+        "name": "Pan Tadeusz",
+        "price": 120,
+        "category": "KSIAZKA"
+      },
+      {
+        "name": "Telefon",
+        "price": 1500,
+        "category": "ELEKTRONIKA"
+      }
+    ]
+  },
+  {
+    "customer": {
+      "name": "IZA",
+      "surname": "DESCZ",
+      "age": 23,
+      "cash": 3000
+    },
+    "products": [
+      {
+        "name": "Komputer",
+        "price": 2300,
+        "category": "ELEKTRONIKA"
+      },
+      {
+        "name": "Buty",
+        "price": 140,
+        "category": "ODZIEZ"
+      }
+    ]
+  },
+  {
+    "customer": {
+      "name": "IGOR",
+      "surname": "BULKA",
+      "age": 25,
+      "cash": 4000
+    },
+    "products": [
+      {
+        "name": "Słuchawki",
+        "price": 150,
+        "category": "ELEKTRONIKA"
+      },
+      {
+        "name": "Bluza",
+        "price": 120,
+        "category": "ODZIEZ"
+      }
+    ]
+  }
+]
