@@ -8,6 +8,7 @@ import com.app.persistence.model.CustomerWithProducts;
 import com.app.persistence.model.Product;
 import com.app.persistence.validator.CustomerWithProductsValidator;
 import com.app.service.exception.OrdersServiceException;
+import org.eclipse.collections.impl.collector.Collectors2;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,6 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
+import static com.app.persistence.model.ProductUtils.*;
+import static com.app.persistence.model.CustomerUtils.*;
 
 public class OrdersService {
 
@@ -52,24 +55,45 @@ public class OrdersService {
     /*
         Wyznacz klienta, który zapłacił najwięcej za wszystkie zakupy.
     */
-    public Customer getCustomerWithMaxExpense() {
-        return customersWithProducts.entrySet()
+    private BigDecimal totalPrice(Map<Product, Long> countedProducts) {
+        return countedProducts
+                .entrySet()
+                .stream()
+                .map(e -> toPrice.apply(e.getKey()).multiply(BigDecimal.valueOf(e.getValue())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public List<Customer> getCustomerWithMaxExpense() {
+
+        /*return customersWithProducts.entrySet()
                 .stream()
                 .max(Comparator.comparing(entry -> getExpense(entry.getValue())))
                 .map(Map.Entry::getKey)
-                .orElseThrow();
+                .orElseThrow();*/
+
+        return customersWithProducts
+                .entrySet()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        e -> totalPrice(e.getValue()),
+                        Collectors.mapping(Map.Entry::getKey, Collectors.toList())
+                ))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByKey())
+                .orElseThrow()
+                .getValue();
     }
 
     private static BigDecimal getExpense(Map<Product, Long> products) {
         return products.entrySet()
                 .stream()
                 .map(OrdersService::getTotalPrice)
-                .reduce(BigDecimal::add)
-                .orElse(BigDecimal.ZERO);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static BigDecimal getTotalPrice(Map.Entry<Product, Long> entry) {
-        return entry.getKey().getPrice().multiply(BigDecimal.valueOf(entry.getValue()));
+        return toPrice.apply(entry.getKey()).multiply(BigDecimal.valueOf(entry.getValue()));
     }
 
     /*
@@ -77,6 +101,19 @@ public class OrdersService {
       za zakupy z wybranej kategorii. Nazwę kategorii przekaż jako
       argument funkcji.
   */
+    private BigDecimal totalPriceForCategory(Map<Product, Long> countedProducts, Category category) {
+        return countedProducts
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey().hasCategory(category))
+                .map(e -> Collections
+                        .nCopies(e.getValue().intValue(), e.getKey())
+                        .stream()
+                        .map(toPrice)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     public Customer getCustomerWithMaxExpenseOnCategory(Category category) {
         return customersWithProducts.entrySet()
                 .stream()
@@ -97,6 +134,39 @@ public class OrdersService {
        Wykonaj zestawienie (mapę), w którym pokażesz wiek klientów oraz
        kategorie produktów, które najchętniej w tym wieku kupowano.
     */
+
+    // --- KM ---
+    public Map<Integer, List<Category>> findMostPopularCategoryForAge() {
+        return customersWithProducts
+                .entrySet()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        e -> toAge.apply(e.getKey()),
+                        // [Integer, Map[Cutomer, Map[Product, Long]]]
+                        Collectors.collectingAndThen(
+                                // ROBIMY LISTE PRODUKTOW DLA DANEGO WIEKU
+                                Collectors.flatMapping(ee -> ee.getValue()
+                                        .entrySet()
+                                        .stream()
+                                        .flatMap(eee -> Collections.nCopies(eee.getValue().intValue(), eee.getKey()).stream()), Collectors.toList()),
+                                // GRUPUJEMY OTRZYMANA WYZEJ LISTE PRODUKTOW PO KATEGORII I WYCIAGAMY KATEGORIE NAJPOPULARNIEJSZA - MOZE BYC
+                                // ICH KILKA
+                                products -> products
+                                        .stream()
+                                        .collect(Collectors.groupingBy(toCategory, counting()))
+                                        .entrySet()
+                                        .stream()
+                                        .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, toList())))
+                                        .entrySet()
+                                        .stream()
+                                        .max(Map.Entry.comparingByKey())
+                                        .orElseThrow()
+                                        .getValue()
+                        )
+                ));
+    }
+    // --- KM ---
+
     public Map<Integer, Category> getAgesWithPopularCategories() {
         return customersWithProducts.entrySet()
                 .stream()
@@ -114,7 +184,7 @@ public class OrdersService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum))
                 .entrySet()
                 .stream()
-                .collect(Collectors.groupingBy(entry -> entry.getKey().getCategory()))
+                .collect(Collectors.groupingBy(entry -> toCategory.apply(entry.getKey())))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> getQuantity(entry.getValue())))
@@ -136,19 +206,26 @@ public class OrdersService {
         w danej kategorii.
      */
     public Map<Category, BigDecimal> getCategoriesWithAveragePrices() {
-        return customersWithProducts.values()
+         return customersWithProducts.values()
                 .stream()
-                .map(Map::keySet)
-                .flatMap(Set::stream)
-                .collect(Collectors.groupingBy(Product::getCategory))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> getAveragePrice(entry.getValue())));
+                 .flatMap(e -> e.entrySet()
+                         .stream()
+                         .flatMap(ee -> Collections.nCopies(ee.getValue().intValue(), ee.getKey()).stream()))
+                 .collect(Collectors.groupingBy(
+                         toCategory,
+                         Collectors.collectingAndThen(
+                                 Collectors.mapping(toPrice, toList()),
+                                 prices -> prices
+                                         .stream()
+                                         .collect(Collectors2.summarizingBigDecimal(p -> p))
+                                         .getAverage()
+                         )
+                 ));
     }
 
     private static BigDecimal getAveragePrice(List<Product> products) {
         BigDecimal sum = products.stream()
-                .map(Product::getPrice)
+                .map(toPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return sum.divide(BigDecimal.valueOf(products.size()), RoundingMode.CEILING);
     }
@@ -158,6 +235,14 @@ public class OrdersService {
         najdroższy oraz produkt najtańszy.
     */
     public Map<Category, Product> getCategoriesAndProductsWithMaxPrice() {
+        /*return customersWithProducts.values()
+                .stream()
+                .map(Map::keySet)
+                .flatMap(Set::stream)
+                .collect(Collectors.groupingBy(Product::getCategory))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> getProductWithMaxPrice(entry.getValue())));*/
         return customersWithProducts.values()
                 .stream()
                 .map(Map::keySet)

@@ -10,10 +10,8 @@ import java.math.BigDecimal;
 @Getter
 @ToString
 public class Customer {
-
-    private final String name;
-    private final String surname;
-    private final Integer age;
-    private final BigDecimal cash;
-
+    final String name;
+    final String surname;
+    final Integer age;
+    final BigDecimal cash;
 }
