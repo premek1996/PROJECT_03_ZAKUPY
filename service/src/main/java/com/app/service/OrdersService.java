@@ -16,9 +16,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.app.persistence.model.CustomerUtils.toAge;
+import static com.app.persistence.model.ProductUtils.toCategory;
+import static com.app.persistence.model.ProductUtils.toPrice;
 import static java.util.stream.Collectors.*;
-import static com.app.persistence.model.ProductUtils.*;
-import static com.app.persistence.model.CustomerUtils.*;
 
 public class OrdersService {
 
@@ -206,21 +207,21 @@ public class OrdersService {
         w danej kategorii.
      */
     public Map<Category, BigDecimal> getCategoriesWithAveragePrices() {
-         return customersWithProducts.values()
+        return customersWithProducts.values()
                 .stream()
-                 .flatMap(e -> e.entrySet()
-                         .stream()
-                         .flatMap(ee -> Collections.nCopies(ee.getValue().intValue(), ee.getKey()).stream()))
-                 .collect(Collectors.groupingBy(
-                         toCategory,
-                         Collectors.collectingAndThen(
-                                 Collectors.mapping(toPrice, toList()),
-                                 prices -> prices
-                                         .stream()
-                                         .collect(Collectors2.summarizingBigDecimal(p -> p))
-                                         .getAverage()
-                         )
-                 ));
+                .flatMap(e -> e.entrySet()
+                        .stream()
+                        .flatMap(ee -> Collections.nCopies(ee.getValue().intValue(), ee.getKey()).stream()))
+                .collect(Collectors.groupingBy(
+                        toCategory,
+                        Collectors.collectingAndThen(
+                                Collectors.mapping(toPrice, toList()),
+                                prices -> prices
+                                        .stream()
+                                        .collect(Collectors2.summarizingBigDecimal(p -> p))
+                                        .getAverage()
+                        )
+                ));
     }
 
     private static BigDecimal getAveragePrice(List<Product> products) {

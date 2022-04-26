@@ -1,7 +1,6 @@
 package com.app.persistence.model;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
