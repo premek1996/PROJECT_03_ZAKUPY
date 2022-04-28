@@ -18,15 +18,42 @@ public class App {
                 .toList();
 
         OrdersService ordersService = new OrdersService(filenames);
+
+        System.out.println("getCustomerWithMaxExpense");
         System.out.println(ordersService.getCustomerWithMaxExpense());
+        System.out.println();
+
+        System.out.println("getCustomerWithMaxExpenseOnCategory");
         System.out.println(ordersService.getCustomerWithMaxExpenseOnCategory(Category.ODZIEZ));
+        System.out.println();
+
+        System.out.println("getCustomerWithMaxExpenseOnCategory");
         System.out.println(ordersService.getCustomerWithMaxExpenseOnCategory(Category.KSIAZKA));
+        System.out.println();
+
+        System.out.println("getCustomersAndDebts");
         System.out.println(ordersService.getCustomersAndDebts());
+        System.out.println();
+
+        System.out.println("getCategoriesWithAveragePrices");
         System.out.println(ordersService.getCategoriesWithAveragePrices());
+        System.out.println();
+
+        System.out.println("getCategoriesAndProductsWithMaxPrice");
         System.out.println(ordersService.getCategoriesAndProductsWithMaxPrice());
+        System.out.println();
+
+        System.out.println("getCategoriesAndProductsWithMinPrice");
         System.out.println(ordersService.getCategoriesAndProductsWithMinPrice());
+        System.out.println();
+
+        System.out.println("getAgesWithPopularCategories");
         System.out.println(ordersService.getAgesWithPopularCategories());
+        System.out.println();
+
+        System.out.println("getCategoriesAndCustomers");
         System.out.println(ordersService.getCategoriesAndCustomers());
+        System.out.println();
     }
 
 }

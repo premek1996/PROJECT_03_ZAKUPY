@@ -1,10 +1,13 @@
 package com.app.persistence.validator;
 
 import com.app.persistence.model.Product;
+import com.app.persistence.model.ProductUtils;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.app.persistence.model.ProductUtils.toPrice;
 
 public class ProductValidator implements Validator<Product> {
 
@@ -20,7 +23,7 @@ public class ProductValidator implements Validator<Product> {
             errors.put("product", "object is null");
             return errors;
         }
-        validatePrice(product.getPrice());
+        validatePrice(toPrice.apply(product));
         return errors;
     }
 

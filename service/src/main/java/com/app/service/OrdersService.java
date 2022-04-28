@@ -248,7 +248,7 @@ public class OrdersService {
                 .stream()
                 .map(Map::keySet)
                 .flatMap(Set::stream)
-                .collect(Collectors.groupingBy(Product::getCategory))
+                .collect(Collectors.groupingBy(toCategory))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> getProductWithMaxPrice(entry.getValue())));
@@ -256,7 +256,7 @@ public class OrdersService {
 
     private static Product getProductWithMaxPrice(List<Product> products) {
         return products.stream()
-                .max(Comparator.comparing(Product::getPrice))
+                .max(Comparator.comparing(toPrice))
                 .orElseThrow();
     }
 
@@ -265,7 +265,7 @@ public class OrdersService {
                 .stream()
                 .map(Map::keySet)
                 .flatMap(Set::stream)
-                .collect(Collectors.groupingBy(Product::getCategory))
+                .collect(Collectors.groupingBy(toCategory))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> getProductWithMinPrice(entry.getValue())));
@@ -273,7 +273,7 @@ public class OrdersService {
 
     private static Product getProductWithMinPrice(List<Product> products) {
         return products.stream()
-                .min(Comparator.comparing(Product::getPrice))
+                .min(Comparator.comparing(toPrice))
                 .orElseThrow();
     }
 
@@ -318,7 +318,7 @@ public class OrdersService {
     private static Map<Category, Long> getCategoriesAndProductsNumbers(Map<Product, Long> products) {
         return products.entrySet()
                 .stream()
-                .collect(Collectors.groupingBy(entry -> entry.getKey().getCategory()))
+                .collect(Collectors.groupingBy(entry -> toCategory.apply(entry.getKey())))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> getQuantity(entry.getValue())));
