@@ -1,7 +1,6 @@
 package com.app.persistence.validator;
 
 import com.app.persistence.model.Product;
-import com.app.persistence.model.ProductUtils;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
