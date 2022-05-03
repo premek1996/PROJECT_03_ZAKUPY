@@ -20,7 +20,7 @@ public class App {
         OrdersService ordersService = new OrdersService(filenames);
 
         System.out.println("getCustomerWithMaxExpense");
-        System.out.println(ordersService.getCustomerWithMaxExpense());
+        System.out.println(ordersService.getCustomersWithMaxExpense());
         System.out.println();
 
         System.out.println("getCustomerWithMaxExpenseOnCategory");

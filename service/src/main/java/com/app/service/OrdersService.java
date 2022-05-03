@@ -64,14 +64,7 @@ public class OrdersService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public List<Customer> getCustomerWithMaxExpense() {
-
-        /*return customersWithProducts.entrySet()
-                .stream()
-                .max(Comparator.comparing(entry -> getExpense(entry.getValue())))
-                .map(Map.Entry::getKey)
-                .orElseThrow();*/
-
+    public List<Customer> getCustomersWithMaxExpense() {
         return customersWithProducts
                 .entrySet()
                 .stream()
@@ -236,14 +229,6 @@ public class OrdersService {
         najdroższy oraz produkt najtańszy.
     */
     public Map<Category, Product> getCategoriesAndProductsWithMaxPrice() {
-        /*return customersWithProducts.values()
-                .stream()
-                .map(Map::keySet)
-                .flatMap(Set::stream)
-                .collect(Collectors.groupingBy(Product::getCategory))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> getProductWithMaxPrice(entry.getValue())));*/
         return customersWithProducts.values()
                 .stream()
                 .map(Map::keySet)
