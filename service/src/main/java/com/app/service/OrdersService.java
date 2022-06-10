@@ -11,7 +11,6 @@ import com.app.service.exception.OrdersServiceException;
 import org.eclipse.collections.impl.collector.Collectors2;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,14 +55,6 @@ public class OrdersService {
     /*
         Wyznacz klienta, który zapłacił najwięcej za wszystkie zakupy.
     */
-    private BigDecimal totalPrice(Map<Product, Long> countedProducts) {
-        return countedProducts
-                .entrySet()
-                .stream()
-                .map(e -> toPrice.apply(e.getKey()).multiply(BigDecimal.valueOf(e.getValue())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     public List<Customer> getCustomersWithMaxExpense() {
         return customersWithProducts
                 .entrySet()
@@ -79,10 +70,11 @@ public class OrdersService {
                 .getValue();
     }
 
-    private static BigDecimal getExpense(Map<Product, Long> products) {
-        return products.entrySet()
+    private BigDecimal totalPrice(Map<Product, Long> countedProducts) {
+        return countedProducts
+                .entrySet()
                 .stream()
-                .map(OrdersService::getTotalPrice)
+                .map(e -> toPrice.apply(e.getKey()).multiply(BigDecimal.valueOf(e.getValue())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -95,20 +87,10 @@ public class OrdersService {
       za zakupy z wybranej kategorii. Nazwę kategorii przekaż jako
       argument funkcji.
   */
-    private BigDecimal totalPriceForCategory(Map<Product, Long> countedProducts, Category category) {
-        return countedProducts
-                .entrySet()
-                .stream()
-                .filter(e -> e.getKey().hasCategory(category))
-                .map(e -> Collections
-                        .nCopies(e.getValue().intValue(), e.getKey())
-                        .stream()
-                        .map(toPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     public Customer getCustomerWithMaxExpenseOnCategory(Category category) {
+        if (category == null) {
+            throw new OrdersServiceException("Category is null");
+        }
         return customersWithProducts.entrySet()
                 .stream()
                 .max(Comparator.comparing(entry -> getExpense(entry.getValue(), category)))
@@ -128,8 +110,6 @@ public class OrdersService {
        Wykonaj zestawienie (mapę), w którym pokażesz wiek klientów oraz
        kategorie produktów, które najchętniej w tym wieku kupowano.
     */
-
-    // --- KM ---
     public Map<Integer, List<Category>> findMostPopularCategoryForAge() {
         return customersWithProducts
                 .entrySet()
@@ -215,13 +195,6 @@ public class OrdersService {
                                         .getAverage()
                         )
                 ));
-    }
-
-    private static BigDecimal getAveragePrice(List<Product> products) {
-        BigDecimal sum = products.stream()
-                .map(toPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return sum.divide(BigDecimal.valueOf(products.size()), RoundingMode.CEILING);
     }
 
     /*
@@ -327,6 +300,13 @@ public class OrdersService {
 
     private BigDecimal getDebt(Customer customer, Map<Product, Long> products) {
         return customer.getCash().subtract(getExpense(products));
+    }
+
+    private static BigDecimal getExpense(Map<Product, Long> products) {
+        return products.entrySet()
+                .stream()
+                .map(OrdersService::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 }
